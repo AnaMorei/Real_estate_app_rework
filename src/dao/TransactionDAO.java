@@ -11,7 +11,11 @@ import java.util.List;
 
 public class TransactionDAO {
 
-  Connection connection = new DatabaseConnection().getConnection();
+  private final Connection connection;
+
+  public TransactionDAO(Connection connection) {
+    this.connection = connection;
+  }
 
   public boolean addTransaction(Transaction transaction) {
     String query = "INSERT INTO Transactions (date, amount, buyer_id, realtor_id, house_id) VALUES (?, ?, ?, ?, ?)";

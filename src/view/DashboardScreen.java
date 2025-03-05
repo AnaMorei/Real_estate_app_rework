@@ -1,5 +1,6 @@
 package view;
 
+import dao.DatabaseConnection;
 import dao.HouseDAO;
 import dao.TransactionDAO;
 import dao.UserDAO;
@@ -15,10 +16,22 @@ import javax.swing.table.DefaultTableModel;
 import model.UserType;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.sql.Connection;
 
 public class DashboardScreen extends javax.swing.JFrame {
 
+  private final HouseDAO houseDAO;
+  private final TransactionDAO transactionDAO;
+  private final UserDAO userDAO;
+
   public DashboardScreen(User user) {
+    DatabaseConnection databaseConnection = DatabaseConnection.getInstance();
+    Connection connection = databaseConnection.getConnection();
+
+    this.houseDAO = new HouseDAO(connection);
+    this.transactionDAO = new TransactionDAO(connection);
+    this.userDAO = new UserDAO(connection);
+
     initComponents();
     centerOnScreen();
     setTitle("Imobiliaria online");
@@ -56,7 +69,7 @@ public class DashboardScreen extends javax.swing.JFrame {
         selectedUser.getId(),
         user.getId(),
         selectedHouse.getId());
-    boolean isTransactionInserted = new TransactionDAO().addTransaction(transaction);
+    boolean isTransactionInserted = transactionDAO.addTransaction(transaction);
 
     if (isTransactionInserted) {
       transactionCreateHouseComboBox.setSelectedIndex(-1);
@@ -87,7 +100,7 @@ public class DashboardScreen extends javax.swing.JFrame {
     String price = houseCreatePriceInput.getText();
     House house = new House(address, description, Double.parseDouble(size), Double.parseDouble(price), user.getId());
 
-    boolean isHouseAdded = new HouseDAO().addHouse(house);
+    boolean isHouseAdded = houseDAO.addHouse(house);
 
     if (isHouseAdded) {
       houseCreateAddressInput.setText("");
@@ -119,8 +132,8 @@ public class DashboardScreen extends javax.swing.JFrame {
   private void setComboBoxInfo() {
     transactionCreateHouseComboBox.removeAllItems();
     transactionCreateBuyerComboBox.removeAllItems();
-    List<House> houses = new HouseDAO().getAllHouses();
-    List<User> users = new UserDAO().getAllUsers();
+    List<House> houses = houseDAO.getAllHouses();
+    List<User> users = userDAO.getAllUsers();
     DefaultComboBoxModel<House> houseModel = new DefaultComboBoxModel<>();
     DefaultComboBoxModel<User> userModel = new DefaultComboBoxModel<>();
 
@@ -137,7 +150,7 @@ public class DashboardScreen extends javax.swing.JFrame {
   }
 
   private void setHouseTableData() {
-    List<House> houses = new HouseDAO().getAllHouses();
+    List<House> houses = houseDAO.getAllHouses();
     DefaultTableModel tableModel = (DefaultTableModel) houseListTable.getModel();
     tableModel.setRowCount(0);
 
@@ -149,13 +162,13 @@ public class DashboardScreen extends javax.swing.JFrame {
   }
 
   private void setTransactionTableData() {
-    List<Transaction> transactions = new TransactionDAO().getAllTransactions();
+    List<Transaction> transactions = transactionDAO.getAllTransactions();
     DefaultTableModel tableModel = (DefaultTableModel) TransactionListTable.getModel();
     tableModel.setRowCount(0);
 
     for (Transaction transaction : transactions) {
-      House house = new HouseDAO().getHouseById(transaction.getHouseId());
-      User user = new UserDAO().getUserById(transaction.getBuyerId());
+      House house = houseDAO.getHouseById(transaction.getHouseId());
+      User user = userDAO.getUserById(transaction.getBuyerId());
 
       Object[] row = {
         house.getAddress(),

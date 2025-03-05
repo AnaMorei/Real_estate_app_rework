@@ -11,7 +11,11 @@ import java.util.List;
 
 public class HouseDAO {
 
-  Connection connection = new DatabaseConnection().getConnection();
+  private final Connection connection;
+
+  public HouseDAO(Connection connection) {
+    this.connection = connection;
+  }
 
   public boolean addHouse(House house) {
     String query = "INSERT INTO Houses (address, description, price, size, realtor_id) VALUES (?, ?, ?, ?, ?)";

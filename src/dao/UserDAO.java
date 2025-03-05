@@ -1,6 +1,5 @@
 package dao;
 
-import dao.DatabaseConnection;
 import util.PasswordUtil;
 import model.UserType;
 import model.User;
@@ -13,7 +12,11 @@ import java.util.List;
 
 public class UserDAO {
 
-  Connection connection = new DatabaseConnection().getConnection();
+  private final Connection connection;
+
+  public UserDAO(Connection connection) {
+    this.connection = connection;
+  }
 
   public List<User> getAllUsers() {
     String sql = "SELECT * FROM Users";

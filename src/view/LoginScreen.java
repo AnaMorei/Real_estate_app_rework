@@ -1,15 +1,24 @@
 package view;
 
+import dao.DatabaseConnection;
 import dao.UserDAO;
 import java.awt.Toolkit;
 import java.awt.Dimension;
+import java.sql.Connection;
 import javax.swing.JOptionPane;
 import model.User;
 import model.UserType;
 
 public class LoginScreen extends javax.swing.JFrame {
 
+  private final UserDAO userDAO;
+
   public LoginScreen() {
+    DatabaseConnection databaseConnection = DatabaseConnection.getInstance();
+    Connection connection = databaseConnection.getConnection();
+
+    this.userDAO = new UserDAO(connection);
+
     initComponents();
     setTitle("Login");
     setResizable(false);
@@ -44,7 +53,7 @@ public class LoginScreen extends javax.swing.JFrame {
     }
 
     final User user = new User(name, email, cpf, UserType.BUYER);
-    final boolean isUserCreated = new UserDAO().addUser(user, password);
+    final boolean isUserCreated = userDAO.addUser(user, password);
 
     if (isUserCreated) {
       JOptionPane.showMessageDialog(
@@ -67,8 +76,8 @@ public class LoginScreen extends javax.swing.JFrame {
   private void tryLogin() {
     final String email = emailText.getText();
     final char[] password = passwordText.getPassword();
-    final User user = new UserDAO().getUserByEmail(email);
-    final boolean isUserValid = new UserDAO().validateUser(email, password);
+    final User user = userDAO.getUserByEmail(email);
+    final boolean isUserValid = userDAO.validateUser(email, password);
 
     if (isUserValid) {
       DashboardScreen dashboardScreen = new DashboardScreen(user);
